@@ -19,12 +19,16 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config) {
 	passwordResetRepo := repository.NewPasswordResetRepository(db)
 	productRepo := repository.NewProductRepository(db)
 	storeRepo := repository.NewStoreRepository(db)
+	orderRepo := repository.NewOrderRepository(db)
 
 	// Initialize services
 	userService := services.NewUserService(userRepo, passwordResetRepo)
 	authService := services.NewAuthService(userService)
 	storeService := services.NewStoreService(storeRepo, userRepo)
 	productService := services.NewProductService(productRepo)
+	orderService := services.NewOrderService(orderRepo, productRepo, storeRepo)
+	chatRepo := repository.NewChatRepository(db)
+	chatService := services.NewChatService(chatRepo)
 
 	// Initialize handlers
 	healthHandler := handlers.NewHealthHandler(cfg)
@@ -33,6 +37,8 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config) {
 	userHandler := handlers.NewUserHandler(userService)
 	productHandler := handlers.NewProductHandler(productService)
 	storeHandler := handlers.NewStoreHandler(storeService)
+	orderHandler := handlers.NewOrderHandler(orderService)
+	chatHandler := handlers.NewChatHandler(chatService)
 
 	// Setup health and root routes
 	SetupHealthRoutes(r, healthHandler)
@@ -46,4 +52,6 @@ func SetupRoutes(r *gin.Engine, cfg *config.Config) {
 	SetupUserRoutes(v1, userHandler)
 	SetupStoreRoutes(v1, storeHandler)
 	SetupProductRoutes(v1, productHandler)
+	SetupOrderRoutes(v1, orderHandler)
+	SetupChatRoutes(v1, chatHandler)
 }
